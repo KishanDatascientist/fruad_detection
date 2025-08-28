@@ -96,15 +96,3 @@ To determine the effectiveness of prevention strategies, key metrics to monitor 
 *   Cost-benefit analysis.
 *   Customer feedback.
 *   Manual review feedback.
-
-## Repository Structure
-
-*   `Fraud.csv`: The dataset file.
-*   `[Your Notebook Name].ipynb`: The Jupyter notebook containing the code for data loading, EDA, feature engineering, preprocessing, modeling, and evaluation.
-*   `README.md`: This file.
-
-## Getting Started
-
-1.  Clone the repository.
-2.  Install the required libraries (e.g., pandas, numpy, scikit-learn, matplotlib, seaborn, lightgbm, xgboost).
-3.  Run the Jupyter notebook to reproduce the analysis and model training.
