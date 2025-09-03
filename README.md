@@ -1,98 +1,54 @@
-# Financial Fraud Detection
+# Fraud Detection Analysis
 
-This project focuses on building a machine learning model to detect fraudulent transactions in a large dataset of financial transactions.
+This repository contains a Jupyter notebook that performs an exploratory data analysis (EDA), feature engineering, and builds machine learning models to detect fraudulent transactions in a financial dataset.
 
-## Project Overview
+## Dataset
 
-Financial fraud is a significant problem for individuals and institutions. This project aims to identify patterns indicative of fraudulent activity and build a predictive model to flag suspicious transactions in real-time. The dataset contains information about various transactions, including the amount, type, origin and destination accounts, and their balances before and after the transaction.
+The dataset used in this analysis is named `Fraud.csv` and contains transaction data with the following columns:
 
-## Data
-
-The dataset used is `Fraud.csv`, which contains over 6 million transaction records. Key features include:
-
-*   `step`: Represents a unit of time (e.g., hour or day).
+*   `step`: Represents a unit of time where 1 step equals 1 hour.
 *   `type`: Type of transaction (e.g., CASH_OUT, PAYMENT, TRANSFER).
-*   `amount`: The transaction amount.
-*   `nameOrig`, `oldbalanceOrg`, `newbalanceOrig`: Origin account details.
-*   `nameDest`, `oldbalanceDest`, `newbalanceDest`: Destination account details.
-*   `isFraud`: The target variable (1 for fraudulent, 0 otherwise).
-*   `isFlaggedFraud`: A rule-based flag for suspicious transactions.
+*   `amount`: The amount of the transaction.
+*   `nameOrig`: Customer who originated the transaction.
+*   `oldbalanceOrg`: Original balance of the originator account before the transaction.
+*   `newbalanceOrig`: New balance of the originator account after the transaction.
+*   `nameDest`: Customer who is the recipient of the transaction.
+*   `oldbalanceDest`: Original balance of the recipient account before the transaction.
+*   `newbalanceDest`: New balance of the recipient account after the transaction.
+*   `isFraud`: This is the target variable, indicating whether the transaction is fraudulent (1) or not (0).
+*   `isFlaggedFraud`: Indicates transactions flagged as fraudulent by the system (1) or not (0).
 
-## Exploratory Data Analysis (EDA)
+## Notebook Contents
 
-The EDA revealed several key insights:
+The notebook covers the following steps:
 
-*   **Severe Class Imbalance:** Fraudulent transactions are very rare (~0.13%).
-*   **`isFlaggedFraud` Ineffectiveness:** This feature flags only a tiny fraction of actual frauds.
-*   **Transaction Type Importance:** Fraud is heavily concentrated in `CASH_OUT` and `TRANSFER` types.
-*   **Amount and Fraud:** Higher transaction amounts are more likely to be fraudulent.
-*   **Temporal Patterns:** Fraudulent transactions are more frequent during early morning hours (2-7 AM), especially on weekends, despite lower overall transaction volume during these times.
-*   **Balance Inconsistencies:** Discrepancies in account balances before and after transactions (`origin_error`, `dest_error`) are strong indicators of fraud.
+1.  **Data Loading and Initial Inspection:** Loading the dataset and performing initial checks for missing values and duplicates.
+2.  **Exploratory Data Analysis (EDA):** Analyzing the distribution of transaction types, amounts, and temporal patterns. Investigating the relationship between these features and fraudulent transactions.
+3.  **Feature Engineering:** Creating new features to capture more informative patterns, such as time-based features (hour, day of week, weekend, working hours) and balance error features.
+4.  **Data Preprocessing:** Handling categorical features, scaling numerical features, and splitting the data into training, validation, and test sets.
+5.  **Model Training and Evaluation:** Training and evaluating several classification models (Logistic Regression, LightGBM, XGBoost, and Random Forest) to predict fraudulent transactions.
+6.  **Model Performance Summary:** Comparing the performance of the different models using metrics like precision, recall, F1-score, and ROC-AUC.
+7.  **Key Factors and Prevention Strategies:** Identifying the most important factors that predict fraudulent transactions and suggesting potential prevention strategies.
 
-## Feature Engineering
+## Model Performance
 
-New features were created to capture the patterns observed during EDA:
+The analysis shows that ensemble models like XGBoost and Random Forest perform significantly better than Logistic Regression in detecting fraud in this imbalanced dataset. The Random Forest model achieved the highest performance metrics and was selected as the final model.
 
-*   Time-based features (`hour`, `day`, `is_weekend`, `is_working_hours`, cyclical hour/day features).
-*   Balance error features (`origin_error`, `dest_error`).
-*   Binary flags for zero balances (`origin_was_zero`, etc.).
-*   Log-transformed amount (`log_amount`) and binned amount (`amount_bin`).
-*   Flag for merchant destinations (`dest_is_merchant`).
+## Key Findings
 
-## Data Preprocessing
-
-A preprocessing pipeline was built using `ColumnTransformer` to handle different feature types:
-
-*   One-Hot Encoding for categorical features (`type`).
-*   Log transformation, imputation, and Robust Scaling for skewed numeric features (`amount`, balances).
-*   Absolute value transformation, imputation, and Robust Scaling for error features.
-*   Robust Scaling for other numeric features (`step`).
-*   Passthrough for binary and cyclical features.
-*   Handling of missing values in balance and error columns (imputed with 0).
-*   Dropping of redundant or highly correlated features (`nameOrig`, `nameDest`, `isFlaggedFraud`, `newbalanceOrig`, `newbalanceDest`, `day_of_month`, `amount`, `hour`, `day`).
-
-The dataset was split into training, validation, and test sets with stratification to maintain the class distribution.
-
-## Modeling
-
-Several machine learning models were evaluated:
-
-*   **Logistic Regression:** Used as a baseline. Showed high recall but very low precision due to the imbalance.
-*   **LightGBM:** A gradient boosting model. Performed well but also struggled with false positives at the default threshold.
-*   **XGBoost:** Another gradient boosting model. Achieved very high performance on both training and validation sets.
-*   **Random Forest:** An ensemble tree-based model. Demonstrated robust performance and good balance between precision and recall.
-
-## Results and Conclusion
-
-Based on the evaluation metrics (Precision, Recall, F1-score, ROC-AUC) and threshold tuning, the **Random Forest Classifier** was selected as the final model. It achieved excellent performance on the unseen test set, effectively identifying fraudulent transactions while minimizing false positives.
-
-Key findings that informed the model:
-
-*   Fraud is highly associated with `CASH_OUT` and `TRANSFER` transactions.
-*   Higher transaction amounts and balance inconsistencies are strong predictors.
-*   Early morning hours and weekends are high-risk periods.
+*   Fraudulent transactions are heavily concentrated in **CASH_OUT** and **TRANSFER** transaction types.
+*   **Higher transaction amounts** are significantly more likely to be associated with fraud.
+*   **Inconsistent balance changes** at the destination account are strong indicators of fraud.
+*   Fraudulent activities are more frequent during **early morning hours**, especially on **weekends**.
 
 ## Prevention Strategies
 
-Based on the model's insights, potential prevention strategies include:
+Based on the findings, the following prevention strategies are suggested:
 
-*   Real-time monitoring and flagging based on the identified risk factors.
-*   Enhanced authentication for high-risk transactions.
-*   Implementing rules based on the model's findings.
-*   Anomaly detection on balance changes.
-*   Considering limits or delays on high-risk transactions during off-hours.
-*   User education.
-*   Continuous model retraining and adaptation.
-
-## How to Evaluate Prevention Actions
-
-To determine the effectiveness of prevention strategies, key metrics to monitor include:
-
-*   Overall fraud rate.
-*   False positive rate.
-*   Analysis of new fraud patterns.
-*   Model performance on new data.
-*   A/B testing of new rules.
-*   Cost-benefit analysis.
-*   Customer feedback.
-*   Manual review feedback.
+*   Real-time monitoring and blocking of high-risk transactions.
+*   Enhanced authentication for suspicious transactions.
+*   Integrating model insights into rule-based systems.
+*   Implementing checks for balance discrepancies.
+*   Limiting transactions during high-risk hours.
+*   Educating users about fraud.
+*   Continuously updating the fraud detection model.
